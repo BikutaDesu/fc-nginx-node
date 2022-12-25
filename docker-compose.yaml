@@ -1,0 +1,46 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: nginx-proxy
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - "8080:80"
+    networks:
+      - nginx-node-network
+    depends_on:
+      - app
+      - db
+
+  app:
+    container_name: node-app
+    build: 
+      context: ./node
+      dockerfile: Dockerfile
+    networks:
+      - nginx-node-network
+    volumes:
+      - ./node:/usr/src/app
+    tty: true
+    depends_on:
+      - db
+
+  db:
+    container_name: app-db
+    image: mysql
+    command: --innodb-use-native-aio=0
+    tty: true
+    restart: always
+    volumes:
+      - ./mysql/dump.sql:/docker-entrypoint-initdb.d/dump.sql
+    environment:
+      MYSQL_ROOT_PASSWORD: "@S3nh4_"
+      MYSQL_DATABASE: nodedb
+    networks:
+      - nginx-node-network
+
+networks:
+  nginx-node-network:
+    driver: bridge
