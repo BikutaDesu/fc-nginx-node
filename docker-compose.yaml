@@ -19,10 +19,9 @@ services:
     build: 
       context: ./node
       dockerfile: Dockerfile
+    entrypoint: dockerize -wait tcp://db:3306 -timeout 20s npm start
     networks:
       - nginx-node-network
-    volumes:
-      - ./node:/usr/src/app
     tty: true
     depends_on:
       - db
